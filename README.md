@@ -45,22 +45,43 @@ for details on each API call or use the MapMyFitness [I/O docs](https://develope
 from your browser.
 
 ```text
-client.me           => [get]  v7.0/user/self/?params
-client.workouts     => [get]  v7.0/workout/?params
-client.add_workout  => [post] v7.0/workout/?params
-client.deactivate   => [post] v7.0/user_deactivation/?params
-client.user         => [get]  v7.0/user/:user_id/?params
-client.user_create  => [post] v7.0/user/?params
-client.user_update  => [put]  v7.0/user/:user_id/?params
-client.user_photo   => [get]  v7.0/user_profile_photo/:user_id/?params
-client.user_stats   => [get]  v7.0/user_stats/:user_id/?params
-client.workout      => [get]  v7.0/workout/:workout_id/?params
-client.achievement  => [get]  v7.0/acievement/:achievement_id/?params
-client.achievements => [get]  v7.0/user_acievement/?params
+client.me                     => [get]    v7.0/user/self
+client.deactivate             => [post]   v7.0/user_deactivation
+client.user                   => [get]    v7.0/user/:user_id
+client.create_user            => [post]   v7.0/user
+client.update_user            => [put]    v7.0/user/:user_id
+client.user_photo             => [get]    v7.0/user_profile_photo/:user_id
+client.user_stats             => [get]    v7.0/user_stats/:user_id
+client.achievement            => [get]    v7.0/acievement/:achievement_id
+client.achievements           => [get]    v7.0/user_acievement
+client.friends                => [get]    v7.0/user
+client.suggested_friends      => [get]    v7.0/user
+client.add_friend             => [post]   v7.0/frendship
+client.remove_friend          => [delete] v7.0/friendship/:friendship_id
+client.approve_friend         => [put]    v7.0/friendship/:friendship_id
+client.friend_requests        => [get]    v7.0/friendship
+client.activity_types         => [get]    v7.0/activity_type
+client.activity_type          => [get]    v7.0/activity_type/:activity_type_id
+client.privacy_options        => [get]    v7.0/privacy_option
+client.privacy_option         => [get]    v7.0/privacy_option/:privacy_option_id
+client.add_workout            => [post]   v7.0/workout
+client.workouts               => [get]    v7.0/workout
+client.workout                => [get]    v7.0/workout/:workout_id
+client.course_leaderboard     => [get]    v7.0/course_leaderboard/:course_id
+client.search_courses         => [get]    v7.0/course
+client.course                 => [get]    v7.0/course/:course_id
+client.route                  => [get]    v7.0/route/:route_id
+client.routes                 => [get]    v7.0/route
+client.nearby_routes          => [get]    v7.0/route
+client.add_route              => [post]   v7.0/route
+client.update_route           => [put]    v7.0/route/:route_id
+client.remove_route           => [delete] v7.0/route/:route_id
+client.bookmarks              => [get]    v7.0/route_bookmark
+client.add_bookmark           => [post]   v7.0/route_bookmark/:route_id
+client.remove_bookmark        => [delete] v7.0/route_bookmark/:route_bookmark_id
 ```
 
-All client methods take an optional params hash which is used to build the
-RESTful API endpoint URI.
+All client methods take an optional params hash.
 
 ## Examples
 
