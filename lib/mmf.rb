@@ -42,11 +42,10 @@ class Mmf::Client
 
   def api
     API_MAP.any? do |name, details|
-      vars = details[:endpoint].scan(VAR).flatten << :params
-      endpoint = interpolate(details[:endpoint], Hash[vars.zip vars])
-      puts "client.#{name}(#{vars.join(?,)})".ljust(45) +
-           "=> [#{details[:method]}]".ljust(10) +
-           "#{endpoint}/?params"
+      vars = details[:endpoint].scan(VAR).flatten
+      context = Hash[vars.zip vars.map {|v| ":#{v}"}]
+      endpoint = interpolate(details[:endpoint], context)
+      puts "client.#{name}".ljust(20) + "=> [#{details[:method]}]".ljust(10) + "#{endpoint}/?params"
     end
   end
 

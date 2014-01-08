@@ -1,6 +1,6 @@
 # Mmf
 
-A Ruby REST Client for the MapMyFitness API
+A Ruby REST Client for the MapMyFitness API. [Here](http://skryl.org) is how I use it.
 
 ## Installation
 
@@ -45,18 +45,35 @@ for details on each API call or use the MapMyFitness [I/O docs](https://develope
 from your browser.
 
 ```text
-client.me(params)                            => [get]  v7.0/user/self/?params
-client.workouts(params)                      => [get]  v7.0/workout/?params
-client.add_workout(params)                   => [post] v7.0/workout/?params
-client.deactivate(params)                    => [post] v7.0/user_deactivation/?params
-client.user(user_id,params)                  => [get]  v7.0/user/user_id/?params
-client.user_photo(user_id,params)            => [get]  v7.0/user_profile_photo/user_id/?params
-client.user_update(user_id,params)           => [put]  v7.0/user/user_id/?params
-client.user_create(params)                   => [post] v7.0/user/?params
-client.user_stats(user_id,params)            => [get]  v7.0/user_stats/user_id/?params
-client.user_workout(workout_id,params)       => [get]  v7.0/workout/workout_id/?params
-client.achievement(achievement_id,params)    => [get]  v7.0/acievement/achievement_id/?params
-client.achievements(params)                  => [get]  v7.0/user_acievement/?params
+client.me           => [get]  v7.0/user/self/?params
+client.workouts     => [get]  v7.0/workout/?params
+client.add_workout  => [post] v7.0/workout/?params
+client.deactivate   => [post] v7.0/user_deactivation/?params
+client.user         => [get]  v7.0/user/:user_id/?params
+client.user_create  => [post] v7.0/user/?params
+client.user_update  => [put]  v7.0/user/:user_id/?params
+client.user_photo   => [get]  v7.0/user_profile_photo/:user_id/?params
+client.user_stats   => [get]  v7.0/user_stats/:user_id/?params
+client.workout      => [get]  v7.0/workout/:workout_id/?params
+client.achievement  => [get]  v7.0/acievement/:achievement_id/?params
+client.achievements => [get]  v7.0/user_acievement/?params
+```
+
+All client methods take an optional params hash which is used to build the
+RESTful API endpoint URI.
+
+## Examples
+
+Get all workouts for the authenticated user.
+
+```ruby
+client.workouts(user: client.me['id'])
+```
+
+Get a single workout with time-series data (distance/heartrate/speed) included.
+
+```ruby
+client.workout(workout_id: 456955773, field_set: 'time_series')
 ```
 
 ## Contributing
