@@ -11,14 +11,14 @@ class Mmf::Client
     # user resources
     me:                 { method: :get,  endpoint: 'v7.0/user/self' },
     deactivate:         { method: :post, endpoint: 'v7.0/user_deactivation', },
-    user:               { method: :get,  endpoint: 'v7.0/user/%{user_id}' },
+    user:               { method: :get,  endpoint: 'v7.0/user/%{user_id}', defaults: { user_id: :me } },
     create_user:        { method: :post, endpoint: 'v7.0/user' },
-    update_user:        { method: :put,  endpoint: 'v7.0/user/%{user_id}' },
-    user_photo:         { method: :get,  endpoint: 'v7.0/user_profile_photo/%{user_id}' },
-    user_stats:         { method: :get,  endpoint: 'v7.0/user_stats/%{user_id}' },
+    update_user:        { method: :put,  endpoint: 'v7.0/user/%{user_id}', defaults: { user_id: :me } },
+    user_photo:         { method: :get,  endpoint: 'v7.0/user_profile_photo/%{user_id}', defaults: { user_id: :me } },
+    user_stats:         { method: :get,  endpoint: 'v7.0/user_stats/%{user_id}', defaults: { user_id: :me } },
 
     achievement:        { method: :get,  endpoint: 'v7.0/acievement/%{achievement_id}' },
-    achievements:       { method: :get,  endpoint: 'v7.0/user_acievement', required: [:user] },
+    achievements:       { method: :get,  endpoint: 'v7.0/user_acievement', required: [:user], defaults: { user: :me } },
 
     # friend resources
     friends:            { method: :get,    endpoint: 'v7.0/user', required: [:friends_with] },
@@ -36,24 +36,24 @@ class Mmf::Client
 
     # workout resources
     add_workout:        { method: :post, endpoint: 'v7.0/workout', required: [:activity_type, :name, :start_datetime, :start_locale_timezone] },
-    workouts:           { method: :get,  endpoint: 'v7.0/workout', required: [:user] },
+    workouts:           { method: :get,  endpoint: 'v7.0/workout', required: [:user], defaults: { user: :me } },
     workout:            { method: :get,  endpoint: 'v7.0/workout/%{workout_id}' },
 
     # course resources
-    # course_leaderboard: { method: :get,  endpoint: 'api/0.1/course_leaderboard/%{course_id}', required: [:activity_type_id] },
-    # course_history:     { method: :get,  endpoint: '/api/0.1/course_history/%{course_id}_%{user_id}' },
     search_courses:     { method: :get,  endpoint: 'v7.0/course' },
     course:             { method: :get,  endpoint: 'v7.0/course/%{course_id}' },
+    # course_leaderboard: { method: :get,  endpoint: 'api/0.1/course_leaderboard/%{course_id}', required: [:activity_type_id] },
+    # course_history:     { method: :get,  endpoint: '/api/0.1/course_history/%{course_id}_%{user_id}' },
     # course_map:         { method: :get,  endpoint: 'api/0.1/course_map/%{course_id}' },
 
     # route resources
     route:              { method: :get,    endpoint: 'v7.0/route/%{route_id}' },
-    routes:             { method: :get,    endpoint: 'v7.0/route', required: [:user] },
+    routes:             { method: :get,    endpoint: 'v7.0/route', required: [:user], defaults: { user: :me } },
     nearby_routes:      { method: :get,    endpoint: 'v7.0/route', required: [:close_to_location, :minimum_distance, :maximum_distance] },
     add_route:          { method: :post,   endpoint: 'v7.0/route' },
     update_route:       { method: :put,    endpoint: 'v7.0/route/%{route_id}' },
     remove_route:       { method: :delete, endpoint: 'v7.0/route/%{route_id}' },
-    bookmarks:          { method: :get,    endpoint: 'v7.0/route_bookmark', required: [:user] },
+    bookmarks:          { method: :get,    endpoint: 'v7.0/route_bookmark', required: [:user], defaults: { user: :me } },
     add_bookmark:       { method: :post,   endpoint: 'v7.0/route_bookmark/%{route_id}' },
     remove_bookmark:    { method: :delete, endpoint: 'v7.0/route_bookmark/%{route_bookmark_id}' }
 
@@ -62,7 +62,7 @@ class Mmf::Client
   attr_accessor :client_key, :client_secret, :access_token
 
   def initialize
-    @client_key, @client_secret, @access_token = ""
+    @client_key, @client_secret, @access_token = '','',''
     yield self
     client  = OAuth2::Client.new(client_key, client_secret)
     @client = OAuth2::AccessToken.new(client, access_token)
@@ -92,10 +92,11 @@ private
   def call(name, params)
     method, endpoint = API_MAP[name].values_at(:method, :endpoint)
     required = API_MAP[name].fetch(:required, []) + url_params(endpoint).map(&:to_sym)
-    defaults = API_MAP[name].fetch(:defaults, {})
+    defaults = expand_special(name, API_MAP[name].fetch(:defaults, {}))
+    params   = defaults.merge(params)
     check_params(name, required, params)
     begin
-      request(method, interpolate(endpoint, params), defaults.merge(params))
+      request(method, interpolate(endpoint, params), params)
     rescue OAuth2::Error => e
       raise JSON.parse(e.message[1..-1]).pretty_inspect
     end
@@ -122,6 +123,11 @@ private
     vars.inject(str) do |str, var|
       str.gsub("\%{#{var}}", (context[var.to_sym] || context[var.to_s]).to_s)
     end
+  end
+
+  def expand_special(name, params)
+    return params if name == :me
+    params.inject({}) {|h, (k,v)| h[k] = (v == :me ? user_id : v); h }
   end
 
   def check_params(name, required, actual)
